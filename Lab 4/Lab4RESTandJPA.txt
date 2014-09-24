@@ -1,0 +1,150 @@
+﻿95-702 Distributed Systems                                                    Lab 4
+
+Lab on REST and JPA                                   Name ________________________     
+
+The purpose of this lab is to create and test a  web service using REST. In addition,
+we will use the Java Persistence API (JPA) to talk to a relational database.
+
+REST is a design style where the HTTP methods are taken seriously and the URL's
+are used to point to resources. These resources have various representations.
+
+JPA is used to allow the application programmer to work with objects rather
+than relations.
+
+Definitions
+===========
+
+A persistence unit is a set of entity classes.
+Entity classes are Java classes that map to relations in a relational database.
+An instance of an entity class maps to a row of the relation.
+
+Part 0
+======
+
+1) Create a Java Web Project named CustomerDBProject
+2) Right click the project node 
+3) Select New/Other/Web Services/RESTful Web Services from Database
+4) In Data Source, select jdbc/sample
+5) Add the Customer Table from Available Tables to Selected Tables
+6) Click Next to reach the Entity Classes dialog box
+7) Enter the package name entities
+8) Click next and select Finish
+9) Browse your Netbeans project and note how the entity classes are separate from the facade classes 
+10) Right click the project node and choose Test RESTful Web Services
+11) Choose Web Test Client in Project
+12) Browse to the CustomerDBProject and select it.
+
+The test browser should now run. Experiment. 
+
+Part 1
+======
+
+Question 1. View the database tables.
+
+a) In Netbeans, visit the Customer relation by selecting services and then 
+   expanding the connected node jdbc:derby…sample
+b) Expand APP and Tables and right click on Customer to view data.
+c) How many customers are there in this relation? ___13____
+
+Question 2. Use the testing platform.
+
+a) Using the testing page, perform an HTTP GET and retrieve the XML representation of customer 409.
+   Hint: Expand the Customer tab and use the {id} option.
+   Copy and paste the XML representation here:
+
+<?xml version="1.0" encoding="UTF-8"?> 
+   <customer> 
+       <addressline1>4400 527th Street</addressline1> 
+       <addressline2>Suite 562</addressline2> 
+       <city>New York</city> 
+       <creditLimit>10000</creditLimit> 
+       <customerId>409</customerId> 
+       <discountCode> 
+           <discountCode>76</discountCode> 
+           <rate>7.00</rate> 
+       </discountCode> 
+       <email>www.oldmedia.example.com</email> 
+       <fax>212-555-0111</fax> 
+       <name>Old Media Productions</name> 
+       <phone>212-555-0110</phone> 
+       <state>NY</state> 
+       <zip> 
+           <areaLength>975.875</areaLength> 
+           <areaWidth>865.681</areaWidth> 
+           <radius>1987.854</radius> 
+           <zipCode>10095</zipCode> 
+       </zip> 
+   </customer>
+
+b) Using the HTTP monitor, paste the URL of the GET request here:
+
+Request: GET http://localhost:6502/CustomerDBProject/webresources/nameentities.customer/409? 
+
+Question 3. Experiment with the testing platform.
+
+a) Using the {from}/{to} option on the testing page, GET an XML representation of 
+   of all three customers from Bob Hosting Corp. through Big Network Systems.
+   Hint: First experiment and see how the {from}/{to} option works.
+b) Paste the XML here:
+
+c) Using the HTTP monitor, paste the URL of the GET request here:
+
+Request: GET http://localhost:6502/CustomerDBProject/webresources/nameentities.customer/Bob Hosting Corp./Big Network Systems? 
+
+Question 4. Experiment with the testing platform.
+
+a) Run the count option on customers. Using the HTTP monitor, paste the URL of the GET request here:
+
+Request: GET http://localhost:6502/CustomerDBProject/webresources/nameentities.customer/count? 
+
+Question 5. Experiment with the testing platform.
+
+a) Run the count option on the discount code relation. Using the HTTP monitor, paste the URL of 
+   the GET request here:
+
+Request: GET http://localhost:6502/CustomerDBProject/webresources/nameentities.discountcode/count? 
+
+Question 6. Add a new operation to the service.
+
+a) Add the following method to CustomerFacadeREST.java.
+
+    @GET
+    @Path("hello")
+    @Produces("text/html")
+    public String helloInHTML() {
+        return "<html><body>Hi</body></html>";
+    }
+
+b) Clean and build and deploy and test the new project.
+
+c) Using the HTTP monitor, what is the URL of a visit to the helloInHTML method?
+
+Request: GET http://localhost:6502/CustomerDBProject/webresources/nameentities.customer/hello?
+
+Question 7. Write a client that accesses the service.
+
+a) Register the web service with the IDE. Click the Services Tab and then right click
+   web services. Choose to add a web service. Enter the URL of the WADL file got from
+   the test page.
+
+b) Create a new Java Project called CustomerDBClientProject. Within this project, create
+   a Java client called CustomerDBClient.java.
+
+c) Right click the project node and select new RESTful Java Client. Give it the class name 
+   NewJerseyClient and select the REST Resource as IDE Registered and browse to the 
+   registered Customer service created in a).
+
+d) Within the main routine of CustomerDBClient.java, enter the following code:
+
+        NewJerseyClient client = new NewJerseyClient();
+        
+        String allXML = client.findAll_XML(String.class); 
+       
+        System.out.println(allXML);
+        
+        client.close();
+
+e) Run this program and show your instructor or TA the result.
+
+
+

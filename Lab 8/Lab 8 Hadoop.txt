@@ -1,0 +1,128 @@
+95-702 Distributed Systems                    MapReduce Lab
+
+password: J0hnheinz!
+MikeHadoop!
+
+Lab 8 
+
+     The purpose of this lab is for the student to establish credentials 
+     on the Heinz College High Performance Computing Cluster and to run 
+     a simple MapReduce job.
+ 
+     You will find your login ID on Blackboard. Look in the area where your grades are 
+     normally posted.
+
+     Your initial password will be provided in class. 
+
+     Before doing this lab, you will need to have the ability to run a secure 
+     shell. You may use putty or some other secure telnet client.
+
+     To work from home, you will first need to install Cisco's AnyConnect
+     available from CMU's software download page.
+
+     After logging onto the cluster, be sure to change your password with the 
+     "passwd" command. Your password requires a capital letter, a number and one of 
+     the following characters: !@#$%^&*()_-+=. 
+
+     Now, complete the 'quiz' that is on Blackboard so that your password is available 
+     to the TA's for the course. 
+
+     The TA's will be using time stamps on files to verify on-time or late submissions. 
+     So, please do not perform any unintended work after the deadline for an assignment.
+
+     0.  Before beginning, I highly recommend that you make a bulk replacement in this file. That
+         is, I would suggest that you change every occurrence of the string "userID" with the 
+         user ID that you have been assigned. You may do this with a local editor. In that way
+         the commands that you will use below will be tailored to your machine. For example,
+         student110 would change every occurrence of the string "userID" to the string 
+         "student110". This will prevent common typing errors.
+
+     1.  Log in to the Jumbo Hadoop cluster by using SSH to connect to the "NameNode" 
+         which is heinz-jumbo.heinz.cmu.local:
+
+              ssh -l student144 heinz-jumbo.heinz.cmu.local
+
+              Change your password now. Use the "passwd" command.
+
+     2.  Your current directory is /home/student144. Verify this with the "pwd" command.
+
+     3.	 Create a directory named "input" and one named "output" in your 
+         /home/student144 directory along with a "lab1" directory to put your results in.
+
+	      mkdir input
+	      mkdir output
+	      mkdir lab1
+
+              Verify this with the "ls" command.
+
+     4.  Change to /usr/local/hadoop.
+
+              cd /usr/local/hadoop
+
+              Verify the change with "pwd" command. "pwd" stands for print working directory.
+
+     5.  For testing, calculate PI with the following command:
+
+              bin/hadoop jar hadoop-examples-*.jar pi 10 1000000
+
+              Twenty mappers may be employed with the following:
+              
+              bin/hadoop jar hadoop-examples-*.jar pi 20 1000000
+
+              Verify: Did the system compute a reasonable value of PI?
+
+     6.  Normally, to upload files, we will use "scp" (secure copy) to transfer files 
+         to jumbo.
+
+     7.  For now, simply construct a text file (use pico or vi) and place it under your /home/input directory.
+			
+              cd ~/input
+         
+              Verify with "pwd".
+
+              Run the pico editor and create a file called "test".
+
+	      pico test
+         
+         Copy and paste this file into test. By "this file" we mean the document you 
+         are currently reading. Use ^o filled by ^x.
+			
+              ^o  to write out the file to disk
+	      ^x to exit pico
+
+     8.  Change back to /usr/local/hadoop.
+
+               cd /usr/local/hadoop
+
+               Verify with "pwd".
+
+     9.  To make a file available on HDFS (assuming it is in the input directory)
+
+               From within /usr/local/hadoop
+
+               bin/hadoop dfs -copyFromLocal /home/student144/input /user/student144/input
+
+     10. Look in the HDFS input directory
+ 
+               bin/hadoop dfs -ls /user/student144/input
+
+     11. Run word count:
+
+               bin/hadoop jar hadoop-examples-*.jar wordcount /user/student144/input /user/student144/output 
+
+               If you get an error then you may have to remove old input and output directories with
+               bin/hadoop dfs -rmr /user/student144/output
+               bin/hadoop dfs -rmr /user/student144/input
+               And return to step 9.
+
+     12. Look at results:
+
+               bin/hadoop dfs -ls /user/student144/output
+        
+     13. Place the results in the lab1 folder in your /home/lab1 directory.
+
+               bin/hadoop dfs -getmerge /user/student144/output ~/lab1/
+
+     14. Examine the results:
+
+               cat ~/lab1/output

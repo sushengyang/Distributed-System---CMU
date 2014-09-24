@@ -1,0 +1,106 @@
+95-702 Distributed Systems
+Android Application Lab
+
+===============================================================================
+Phase 1 - If you have not already done the "Hello World" exercises creating 
+a simple Android application
+===============================================================================
+Create an Android Project in Eclipse
+===============================================================================
+
+1. File, new, other...
+2. Expand the "Android" folder
+3. Choose "Android Application Project"
+4. Click on "Next>"
+5. Give an "Application Name" (e.g. "Hello Android")
+6. Give a "Project Name" for within Eclipse (e.g. "HelloAndroid")
+7. Use a good "Package Name", e.g., edu.cmu.andrewid.helloAndroid
+8. Select targets API 18: Android 4.3
+9. Click through to the "Create Activity" page
+10. Make sure "Create Activity" is checked, and "Blank Activity" is selected.
+11. Click through to "Finish"
+
+NOTE:  When I clicked "Finish", it created the project, but the wizard did
+not go away.  Click "Cancel" to leave the wizard.
+
+===============================================================================
+Running an app in the emulator
+===============================================================================
+1. Mouse down on the Run As icon drop down menu (green circle with triangle)
+2. Run As -> Android Application
+3. If you get a dialog box with "Auto Monitor Logcat" choose "Yes" and popup
+	menu option "verbose".
+4. On the emulator, unlock the simulated phone. Your "Hello Android" application
+	should appear. (It may take a long time to start the emulator.  And if the 
+	starting of your application fails by timing out, wait until the Android
+	emulator is running and unlocked and try again.
+
+===============================================================================
+Exercises
+===============================================================================
+
+1. Explore the contents of the project's res directory. The file
+	res/values/strings.xml defines static strings that are used in your
+	application. Change the string named "hello_world" to include your
+	name (e.g. Hello Joe!)
+
+2. Explore the res/layout/activity_main.xml file in both "Graphical Layout"
+	and "activity_main.xml" modes (see bottom tabs). Add a "Plain Text" field
+	found under the "Text Fields" folder by dragging it onto the screen layout.
+	Give it an initial text of "Type here..."
+  
+===============================================================================
+Phase 2 - Interesting Picture
+===============================================================================
+
+1. Download the zipped Eclipse project from the course calendar, and import it
+	into your Eclipse workspace.
+2. Get a Flickr API key from:
+	http://www.flickr.com/services/api/misc.api_keys.html
+3. Put your API key where it says "<<<put your Flickr api key here>>>" in 
+	GetPicture.java  (replace the << and >> also!).
+4. Make sure you have the following lines in your AndroidManifest.xml.
+
+	<uses-permission android:name="android.permission.INTERNET" />
+	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+	Without them your Android application cannot access the Internet.
+	
+5. Right click on your project name, and select "Properties"
+		a. Select "Android"
+		b. Make sure Android 4.3 is selected as the target.
+		c. "Apply" and "OK" to close
+6. Run and test it.
+7. The application is missing the feedback "Here is a picture of a ..." or 
+	"Sorry, I could not find a picture of a..."
+     a. Add a new TextView to res/layout/main.xml for this feedback
+     b. In the pictureReady method, findViewById your new TextView
+     c. Set the text of the TextView to the appropriate string (relative to
+     		whether the picture is found or not).
+          (Where can you get the search term from for this string?)
+8. Run and test it.
+
+9. Sort the following list of methods into the order they are invoked when
+	"submit" is clicked, and indicate whether they are being run in the "UI" 
+	thread or a helper thread. See for reference the AsyncTask API:
+	http://developer.android.com/reference/android/os/AsyncTask.html
+
+      AsyncFlickrSearch.search
+      doInBackground
+      GetPict   ure.search
+      getRemoteImage
+      getRemoteXML
+      onClick
+      onPostExecute
+      pictureReady
+
+===============================================================================
+Show a TA
+===============================================================================
+
+For credit for the lab, show a TA:
+	- Working Phase 1 through exercise 2
+	- Working Phase 2 through step 8
+	- Your sorted list from Phase 2 step 9
+			(BTW, a question regarding UI and helper threads is likely on the test.)
+	

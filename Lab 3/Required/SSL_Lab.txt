@@ -1,0 +1,182 @@
+95-702 Distributed Systems               Crypto Lab 3
+
+    The objective of this lab is to learn how to create keys
+    and certificates using the keytool command and how to use 
+    SSL sockets.
+    
+    We will also explore the use of password authentication in the 
+    layer immediately above the SSL layer.
+
+    In the discussion that follows, I used "mjm" because those are my initials.
+    Use your own initials wherever you see "mjm".
+
+1)  Create two empty directories. One will be called clientSide and the other will be called
+    serverSide.
+
+2)  In the server side directory, run keytool to create a keystore holding RSA keys.
+
+     keytool -genkey -alias mjm -keyalg RSA -keystore mjmkeystore.jks
+
+     Respond to the prompts. Use the password sesame for the keystore
+     as well as the key.
+
+     How many bytes is your keystone? _________________
+     
+3) In the server side directory, run keytool to extract a certificate.
+ 
+    keytool -export -alias mjm -keystore mjmkeystore.jks -file mjm.cer
+
+    How many bytes is your self signed certificate? ________________
+
+4) Move the certificate to the client side directory. It should no 
+   longer be on the serverSide (though, it will not hurt if it is.)
+
+5) On the client side, place the certificate into a truststore.
+
+     keytool -import -alias mjm -keystore mjm.truststore -file mjm.cer
+
+     The truststore now contains a public key that you trust. So, when 
+     prompted, say that you trust this certificate.
+
+     What hash algorithm was was used to compute the hash? ________
+
+     How many bytes is your truststore? ____________
+
+6) Place Client.java into the client side directory.
+
+7) Place Server.java into the server side directory.
+
+8) Compile (javac) and run (java) Server.java.
+
+9) Compile (javac) and run (java) Client.java.
+
+10) Modify the client and the server so that the server speaks first.
+It will ask that the client provide a user name. The client will
+be prompted for the username and will enter one. The server will then
+read the user name and ask the client for a password. The client will
+respond with a password. If the username and password are correct the 
+server will say "Greetings Client!". If the user name and password are
+not correct the server will say "Sorry, you are not authorized". The only
+legal user name and password will be "McCutchen" and "bucco".
+
+In my solution, I had to be sure to use out.newLine() and out.flush()
+when writing to the outgoing sockets.
+
+Show this page and your working client and server to your
+TA or instructor.
+
+==================== Client.java =====================
+import java.io.*;
+import javax.net.ssl.*;
+import java.net.*;
+import javax.net.*;
+
+public class Client {
+    
+    public static void main(String args[]) {
+        
+        int port = 6502;
+        try {
+            // tell the system who we trust
+            System.setProperty("javax.net.ssl.trustStore","mjm.truststore");
+            // get an SSLSocketFactory
+            SocketFactory sf = SSLSocketFactory.getDefault();
+            
+            // an SSLSocket "is a" Socket
+            Socket s = sf.createSocket("localhost",6502);
+            
+            
+            BufferedWriter out = new BufferedWriter(
+                                                    new OutputStreamWriter(
+                                                                           s.getOutputStream()));
+            BufferedReader in = new 
+            BufferedReader(
+                           new InputStreamReader(
+                                                 s.getInputStream()));
+            out.write("Hello server\n");
+            out.flush();
+            String answer = in.readLine();               
+            System.out.println(answer);
+            out.close(); 
+            in.close();
+        }
+        catch(Exception e) {
+            System.out.println("Exception thrown " + e);
+        }
+    }
+} 
+
+
+================== Server.java ================================
+
+
+// Server side SSL 
+import java.io.*;
+import java.net.*;
+import javax.net.*;
+import javax.net.ssl.*;
+import java.security.*;
+
+public class Server {
+    
+    // hold the name of the keystore containing public and private keys
+    static String keyStore = "mjmkeystore.jks";
+    
+    // password of the keystore (same as the alias)
+    static char keyStorePass[] = "sesame".toCharArray();
+    public static void main(String args[]) {
+        
+        int port = 6502;
+        SSLServerSocket server;
+        
+        try {
+            // get the keystore into memory
+            KeyStore ks = KeyStore.getInstance("JKS");
+            ks.load(new FileInputStream(keyStore), keyStorePass);
+            
+            // initialize the key manager factory with the keystore data
+            KeyManagerFactory kmf = 
+            KeyManagerFactory.getInstance("SunX509");
+            kmf.init(ks,keyStorePass);
+            
+            // initialize the SSLContext engine
+            // may throw NoSuchProvider or NoSuchAlgorithm exception
+            // TLS - Transport Layer Security most generic
+            
+            SSLContext sslContext = SSLContext.getInstance("TLS");
+            
+            // Inititialize context with given KeyManagers, TrustManagers, 
+            // SecureRandom defaults taken if null
+            
+            sslContext.init(kmf.getKeyManagers(), null, null);
+            
+            // Get ServerSocketFactory from the context object
+            ServerSocketFactory ssf = sslContext.getServerSocketFactory();
+            //  Now like programming with normal server sockets               
+            ServerSocket serverSocket = ssf.createServerSocket(port);
+            
+            System.out.println("Accepting secure connections");
+            
+            Socket client = serverSocket.accept();
+            System.out.println("Got connection");
+            
+            BufferedWriter out = new BufferedWriter(
+                                                    new OutputStreamWriter(
+                                                                           client.getOutputStream()));
+            BufferedReader in = new BufferedReader(
+                                                   new InputStreamReader(
+                                                                         client.getInputStream()));
+            String msg = in.readLine();
+            System.out.println("Got message " + msg);
+            out.write("Hello client\n");
+            out.flush();
+            in.close();
+            out.close();
+            
+            
+        }
+        catch(Exception e) {
+            System.out.println("Exception thrown " + e);
+        }
+    }
+}

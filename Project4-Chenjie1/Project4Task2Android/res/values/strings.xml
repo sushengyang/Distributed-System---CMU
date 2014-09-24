@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="hello">Type a price and a down payment to calculate monthly payment.</string>
+    <string name="app_name">Payment Calculation</string>
+</resources>

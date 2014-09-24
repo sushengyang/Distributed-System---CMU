@@ -1,0 +1,226 @@
+
+95-702 Distributed Systems                  RMI Lab
+
+In lab work, it is OK to work with others. However, in the end, you
+must have a working solution running on your own laptop. For credit, show 
+your TA or your instructor your working solution on your own laptop.
+
+This lab is broken into two parts.
+
+Part 1.
+=======
+
+The first part of this lab takes you through the steps of deploying a 
+simple Java RMI application. It is recommended that you complete this
+introductory exercise before attempting part 2.
+
+For credit, show your TA or instructor that you have completed part 2.
+
+Note that the use of rmic is now optional. In other words, in the most
+recent versions of Java, you do not need to generate the stub file 
+and copy it to the client. The stub or proxy is available via the 
+client side lookup on the registry. 
+
+This is a very simple Java RMI application that illustrates the use 
+of interfaces and the RMIC tool. Note that it is designed to work 
+from the command prompt. If working on a PC, you will need to have 
+the java bin directory in your path variable.
+
+1. Create two directories from a DOS or Unix prompt. Name one directory 
+'RMILabServer' and the other directory 'RMILabClient'.
+
+2. Within the server directory, save the following three classes.
+
+//************************************************************
+// Calculator.java                Interface for a Calculator
+import java.rmi.*;
+public interface Calculator extends Remote {
+   // this method will be called from remote clients
+   int add (int x, int y) throws RemoteException;
+}
+
+//*************************************************************
+// CalculatorServant.java        
+// A Remote object class that implements Calculator. 
+import java.rmi.*;
+import java.rmi.server.UnicastRemoteObject;
+public class CalculatorServant extends UnicastRemoteObject implements Calculator {
+       public CalculatorServant() throws RemoteException {
+       }
+       public int add(int x, int y) throws RemoteException {
+            System.out.println("Got request to add " + x + " and " + y);
+
+            return x + y;
+    }
+}
+
+//**************************************************************
+// CalculatorServer.java             Serve remote Calculator
+// Creates a calculator object and gives
+// it a name in the registry.
+import java.rmi.*;
+public class CalculatorServer {
+	public static void main(String args[]){
+          System.out.println("Calculator Server Running");
+          try{
+            // create the servant
+            Calculator c = new CalculatorServant();
+            System.out.println("Created Calculator object");
+            System.out.println("Placing in registry");
+            // publish to registry
+	    Naming.rebind("CoolCalculator", c); 
+            System.out.println("CalculatorServant object ready");
+           }catch(Exception e) {
+            System.out.println("CalculatorServer error main " + e.getMessage());
+        }
+    }
+}
+
+Compile all the code with the command "javac *.*". Run RMIC on the servant 
+class with the command "rmic -v1.2 CalculatorServant". Copy the interface 
+Calculator.java and the stub class to the client. The stub will be called 
+CalculatorServant_Stub.class. Within the server directory, start the 
+rmiregistry with the command "rmiregistry &" (Unix) or "start rmiregistry (DOS)". 
+Run the server with the command "java CalculatorServer".
+ 
+3. In the client directory, enter the following program:
+
+//*******************************************************
+// CalculatorClient.java                 
+// This client gets a remote reference from the rmiregistry
+// that is listening on the default port of 1099.
+// It allows the client to quit with a "!". 
+// Otherwise, it computes the sum of two integers 
+// using the remote calculator.
+
+import java.rmi.*;
+import java.rmi.server.*;
+import java.io.*;
+import java.util.StringTokenizer;
+
+public class CalculatorClient {
+   public static void main(String args[]) throws Exception {
+        BufferedReader in  = 
+                     new BufferedReader(
+                         new InputStreamReader(System.in));  
+        // connect to the rmiregistry and get a remote reference to the Calculator 
+        // object.
+        Calculator c  = (Calculator) Naming.lookup("//localhost/CoolCalculator");
+ 	System.out.println("Found calculator. Enter ! to quit");
+   	while(true) {
+           try { 
+                 // prompt the user 
+                 System.out.print("client>");
+                 // get a line
+                 String line  = in.readLine();
+                 // if a "!" is entered just exit
+                 if(line.equals("!")) System.exit(0);
+                 // if it's not a return get the two integers and call add
+                 // on the remote calculator.
+                 if(!line.equals("")) {            
+                  StringTokenizer st = new StringTokenizer(line);
+                  String v1 = st.nextToken();
+                  String v2 = st.nextToken();
+                  int i  = Integer.parseInt(v1);
+                  int j  = Integer.parseInt(v2);
+                  int sum = c.add(i,j);
+                  System.out.println(sum);
+                  }
+               }
+                       
+	      catch(RemoteException e) {
+                   System.out.println("allComments: " + e.getMessage());
+              }
+	   }
+    }
+}
+
+Compile the code on the client and run with the command "java CalculatorClient". 
+Study what you have and then begin the main exersise of this lab.
+
+===============================================================================
+
+
+Part 2.
+=======
+
+In this part, you will compare the performance of web services with Java RMI.
+
+Write a web service according to the following specification:
+
+    @WebMethod(operationName = "bump")
+    public boolean bump() {
+      // A call on bump() adds 1 to a BigInteger held by the service.
+      // It then returns true on completion.
+      // The BigInteger is changed by the call on bump(). That is, 
+      // 1 is added to the BigInteger and that value persists until
+      // another call on bump occurs. 
+        
+    }
+    
+    @WebMethod(operationName = "get")
+    public BigInteger get() {
+      // a call on get returns the BigInteger held by the service     
+    }
+
+Write a web service client according to the following specification:
+
+    The main routine creates a BigInteger (called ctr) initialized to 0.
+    The main routine creates another BigInteger (called n) initialized to 10000.
+    The main routine loops until the ctr equals n. Each time through the loop,
+    ctr is incremented by 1. Each time through the loop, the web service method
+    bump is called.
+
+    Before the loop in the main routine begins, set a timer like this:
+        long start = System.currentTimeMillis();
+    When the loop is finished, find the ending time like this:
+        long stop = System.currentTimeMillis();
+
+    At the end of the main routine, display the value of the BigInteger held on
+    the server by calling the get() method. In addition, display the number of seconds
+    that it took to call this service 10,000 times.
+
+Write a Java RMI service according to the following specification:
+
+    // The class extends UnicastRemoteObject and implements Bumper
+  
+    // The server calls rebind on the rmiregistry giving the remote
+    // object the name "bumper".
+
+    public boolean bump() throws RemoteException {
+      // A call on bump() adds 1 to a BigInteger held by the service.
+      // It then returns true on completion.
+      // The BigInteger is changed by the call on bump(). That is, 
+      // 1 is added to the BigInteger and that value persists until
+      // another call on bump occurs.      
+    }
+
+    public BigInteger get() throws RemoteException {
+      // a call on get returns the BigInteger held by the service
+    }
+
+Write a Java RMI client according to the following specification:
+
+    The main routine performs a lookup on the rmi registry for a remote
+    object that implements the Bumber interface. The object is called
+    "bumper".
+
+    The main routine creates a BigInteger (called ctr) initialized to 0.
+    The main routine creates another BigInteger (called n) initialized to 10000.
+    The main routine loops until the ctr equals n. Each time through the loop,
+    ctr is incremented by 1. Each time through the loop, the remote  method
+    bump is called.
+
+    Before the loop in the main routine begins, set a timer like this:
+        long start = System.currentTimeMillis();
+    When the loop is finished, find the ending time like this:
+        long stop = System.currentTimeMillis();
+
+    At the end of the main routine, display the value of the BigInteger held on
+    the server by calling the remote method get(). In addition, display the number of seconds
+    that it took to call this service 10,000 times.
+
+What do you conclude? Which is faster, RMI or web service? And, by how much?
+
+
+

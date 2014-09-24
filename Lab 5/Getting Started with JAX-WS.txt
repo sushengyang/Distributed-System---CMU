@@ -1,0 +1,19 @@
+95-702 Distributed Systems     Getting Started with JAX-WS
+
+Building a WEB Service (JAX-WS SOAP based) in Netbeans
+
+1) New Web Project
+2) Right click project new web service
+     package name
+3) Add code to the service
+4) Clean and build and deploy
+5) Select service and TEST
+6) Copy WSDL URL from test screen
+
+Build Web Service client
+1) New java project
+2) Right click project New Web Service Client
+3) Provide the URL of WSDL
+4) A new Web Reference is created
+5) Drag red dot into code
+6) Write the code to call the web service proxy methods 
